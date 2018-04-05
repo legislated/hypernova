@@ -1,6 +1,23 @@
 /* eslint func-names:0 no-extra-parens:0  */
 import 'airbnb-js-shims';
-import Promise from 'bluebird';
+
+function uncache(moduleName) {
+  const path = require.resolve(moduleName);
+  const module = require.cache[path];
+
+  delete require.cache[path];
+
+  return function () {
+    require.cache[path] = module;
+  };
+}
+
+// grab a fresh copy of bluebird since this script mutates it, and other
+// modules may depend on it
+const restore = uncache('bluebird');
+const Promise = require('bluebird');
+
+restore();
 
 const es6methods = ['then', 'catch', 'constructor'];
 const es6StaticMethods = ['all', 'race', 'resolve', 'reject', 'cast'];
